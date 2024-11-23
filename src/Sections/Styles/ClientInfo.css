@@ -1,0 +1,32 @@
+.ClientHeader {
+  padding: 10px;
+  background-color: #efefef;
+  border-bottom: 2px solid black;
+}
+
+.ClientHeader h1 {
+  margin: 0;
+  margin-bottom: 10px;
+}
+
+.ClientContent {
+  padding: 10px 20px;
+  margin: 0;
+}
+
+.ClientOptions {
+  width: 100%;
+  display: flex;
+  margin-bottom: 8px;
+}
+
+.ClientOptions b {
+  font-weight: bold;
+  display: block;
+}
+
+.ClientOptions p {
+  margin: 0;
+  margin-left: 10px;
+  display: block;
+}
