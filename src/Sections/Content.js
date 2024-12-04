@@ -8,7 +8,9 @@ function Content() {
     <div>
       <ClientInfo />
       <Configurator />
-      
+      <div>
+        <img src={logo} style={{position: "absolute", right: 15, top: 15}} width="200" />
+      </div>
     </div>
   );
 }
