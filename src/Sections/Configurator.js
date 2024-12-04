@@ -1,6 +1,6 @@
 import InputList from "../Components/Input/InputList";
+import InputNumber from "../Components/Input/InputNumber";
 import Installation from "./Installation";
-import Magazine from "./Magazine";
 import "./Styles/Configurator.css";
 import { useEffect, useState, useRef } from "react";
 
@@ -32,9 +32,27 @@ function Configurator() {
     brutto: 0,
     narzut: 0,
   });
+  const [advanceMode, setAdvanceMode] = useState(false);
+  const [expand, setExpand] = useState(false);
+  const [narzut, setNarzut] = useState(0);
+  const [falownikCategory, setFalownikCategory] = useState(null);
   const menuRef = useRef(null);
 
+  const setTypeOfFalownik = (formData) => {
+    if(formData["Falownik"]) {
+      const falownik = formData["Falownik"];
+      const {category} = JSON.parse(falownik);
+      setFalownikCategory(category);
+    }
+  }
+
   const countCosts = (formData) => {
+    if(formData["Narzut"]) {
+      const narzutString = formData["Narzut"];
+      const narzutJSON = JSON.parse(narzutString);
+      setNarzut(narzutJSON.price);
+    }
+
     const priceArray = Object.values(formData).map((objectInString) => {
       if (isValidJSON(objectInString)) {
         const objectInJSON = JSON.parse(objectInString);
@@ -52,7 +70,7 @@ function Configurator() {
     }, 0);
 
     const readyObject = {
-      vat: sum * 0.23,
+      vat: Math.ceil(sum * 0.23),
       netto: sum - sum * 0.23,
       brutto: sum,
       narzut: 0,
@@ -95,6 +113,7 @@ function Configurator() {
 
   useEffect(() => {
     countCosts(formData);
+    setTypeOfFalownik(formData);
   }, [formData]);
 
   return (
@@ -116,25 +135,32 @@ function Configurator() {
         </div>
         <div className="ConfiguratorBox">
           <div className="BoxItem BoxItem-1">
-            <InputList
-              Title={Object.keys(defaultFormData)[0]}
-              handleForm={handleFormChange}
-              Items={["Instalacja + magazyn energii", "Magazyn energii"]}
-              defaultItem={1}
-              changeFunction={onOptionChange}
-            />
-            {option === defaultFormData[Object.keys(defaultFormData)[0]] ? (
-              <Installation handleForm={handleFormChange} />
-            ) : (
-              <Magazine />
+            {menuIndex === 0 && (
+              <>
+                <InputList
+                  Title={Object.keys(defaultFormData)[0]}
+                  handleForm={handleFormChange}
+                  Items={["Instalacja + magazyn energii", "Magazyn energii", "Instalacja"]}
+                  defaultItem={1}
+                  changeFunction={onOptionChange}
+                />
+                  <Installation handleForm={handleFormChange} formValues={formData} option={option} falownikCategory={falownikCategory} />
+              </>
+            )}
+            {menuIndex === 1 && (
+              <p>Sekcja ocieplenia już wkrótce!</p>
+            )}
+            {menuIndex === 2 && (
+              <p>Sekcja pomp ciepła już wkrótce!</p>
             )}
           </div>
           <div className="BoxItem BoxItem-2">
-            <button className="SendButton" type="submit">
-              Zapisz ofertę!
-            </button>
-            <div className="BoxInner">
-              <div className="BoxInnerHeader">PV i magazyn</div>
+            <div className={`BoxInner BoxInnerToggle ${expand && "BoxInnerToggle-active"}`}>
+              <h2 onClick={() => setExpand((prev) => prev ? false : true)} className="BoxInnerHeader">PV i magazyn</h2>
+              <div className={`BoxInnerContent ${expand && "BoxInnerContent-active"}`}>
+                <p>Zobacz i edytuj dodatkowe infomracje!</p>
+                {advanceMode && <InputNumber handleForm={handleFormChange} Title={"Narzut"} />}
+              </div>
             </div>
             <div className="BoxInner">
               <div className="BoxInnerHeader">Podsumowanie</div>
@@ -151,12 +177,17 @@ function Configurator() {
                   <div className="CostHeader">Suma brutto</div>
                   <div className="CostContent">{prices.brutto} zł</div>
                 </div>
-                <div className="CostElement">
+                {advanceMode && <div className="CostElement">
                   <div className="CostHeader">Narzut</div>
-                  <div className="CostContent">{prices.narzut} zł</div>
-                </div>
+                  <div className="CostContent">{narzut} zł</div>
+                </div>}
               </div>
             </div>
+            <button className="SendButton" type="submit">
+              Zapisz ofertę! 
+            </button>
+            <div className="ProffButton" onClick={() => setAdvanceMode((last) => last ? false : true)}>{advanceMode ? "Zamknij" : "Uruchom"} tryb zaawansowany</div>
+
           </div>
         </div>
       </div>

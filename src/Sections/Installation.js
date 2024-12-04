@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import "./Styles/Configurator.css";
 import Airtable from "airtable";
 import InputList from "../Components/Input/InputList";
+import MultiListInput from "../Components/Input/MultiListInput";
 
 const table = new Airtable({
   apiKey:
@@ -9,12 +10,11 @@ const table = new Airtable({
 }).base("appkqjNBUA2Ok9LXv");
 
 // Nazwy baz danych w AirTable
-const modulesBase = "Moduły";
+const modulesBase = "Moduły Main";
+const modulesNextBase = "Moduły";
 const falownikiBase = "Falowniki";
-// Ilość panelu dostępnych do wybrania
-const countOfModules = 22;
 
-function Installation({ handleForm }) {
+function Installation({ handleForm, formValues, option, falownikCategory }) {
   const [modules, setModules] = useState([]);
   const [falowniki, setFalowniki] = useState([]);
   const [modulesValues, setModulesValues] = useState([]);
@@ -25,29 +25,65 @@ function Installation({ handleForm }) {
   const onModuleChange = (event) => {
     const { value } = event.target;
 
-    // Zmiana dostępnych paneli do wyboru
-    const list = modules.find((v) => v.name === value).kWoltList;
-    setModulesValues(list);
+    table(modulesNextBase).select().firstPage((err, records) => {
+      if (err) console.error(err);
+      else {
+        setLoading(true);
+        let moduleDetails = records.filter(({ fields }) => fields["Module Name"][0] === value);
+        const moduleDetailsSorted = moduleDetails.sort((a, b) => a.fields["kW Value"] - b.fields["kW Value"]);
+        const moduleDetailsProcessed = moduleDetailsSorted.map(({ fields }) => ({
+          name: `${fields["Ilość paneli"]} - ${fields["kW Value"] / 100} kW (${fields["Ile faz"]})`,
+          value: JSON.stringify({
+            kw: (fields["kW Value"] / 100),
+            fazy: fields["Ile faz"],
+            price: formValues["Konstrukcja"] && formValues["Konstrukcja"] === "Grunt" ? fields["Price Grunt"] : fields["Price"],
+            howMuch: fields["Ilość paneli"]
+          })
+        }));
+        setModulesValues(moduleDetailsProcessed);
+        setLoading(false);
+      }
+    });
   };
 
   const onModuleValuesChange = (event) => {
     const { value } = event.target;
 
-    const { kWoltValue } = JSON.parse(value);
+    const { kw } = JSON.parse(value);
 
     setFalownikiLoading(true);
 
     table(falownikiBase)
       .select()
       .firstPage((err, records) => {
-        const foundFalowniki = records.filter(
-          (record) =>
-            record.fields["Moc falownika min"] <= kWoltValue &&
-            record.fields["Moc falownika max"] >= kWoltValue
-        );
+        let foundFalowniki = [];
+        if(option === "Instalacja + magazyn energii") {
+          foundFalowniki = records.filter(
+            (record) =>
+              record.fields["Moc falownika min"] / 100 <= kw &&
+              record.fields["Moc falownika max"] / 100 >= kw && 
+              record.fields["Kategoria"] === "Hybryda" ||
+              record.fields["Kategoria"] === "Zestaw"
+          ); 
+        } else if (option === "Instalacja") {
+          foundFalowniki = records.filter(
+            (record) =>
+              record.fields["Moc falownika min"] / 100 <= kw &&
+              record.fields["Moc falownika max"] / 100 >= kw && 
+              record.fields["Kategoria"] === "Zwykły" 
+          );
+        } else {
+          foundFalowniki = records.filter(
+            (record) =>
+              record.fields["Moc falownika min"] / 100 <= kw &&
+              record.fields["Moc falownika max"] / 100 >= kw 
+          );
+        }
+
+        console.log(foundFalowniki);
 
         const namesOfFalowniki = foundFalowniki.map(
-          ({ fields: { Name } }) => Name
+          ({ fields }) => ({ name: fields.Name, price: fields.Price, category: fields["Kategoria"] })
         );
 
         setFalowniki(namesOfFalowniki);
@@ -55,35 +91,15 @@ function Installation({ handleForm }) {
       });
   };
 
+  // Pobranie nazw modułów z bazy danych
   const fetchModulesData = async () => {
     await table(modulesBase)
       .select()
       .firstPage((err, records) => {
         if (err) console.error(err);
         else {
-          records.forEach((record) => {
-            const { Name } = record.fields;
-            const woltValue = record.fields["Wartość W"];
-            const price = record.fields["Price"];
-
-            const kWoltList = [];
-
-            for (let i = 1; i < countOfModules; i++) {
-              const resultOfCalculation = (woltValue * i) / 1000;
-
-              const calcPrice = price * i;
-
-              const countedObject = {
-                howMany: i,
-                kWoltValue: resultOfCalculation,
-                price: calcPrice,
-              };
-
-              kWoltList.push(countedObject);
-            }
-
-            setModules((base) => [...base, { name: Name, kWoltList }]);
-          });
+          const modulesData = records.map(({fields: {Name}}) => Name);
+          setModules(modulesData);
         }
       });
   };
@@ -96,23 +112,18 @@ function Installation({ handleForm }) {
 
   // Uruchomienie po wczytaniu modułów
   useEffect(() => {
-    if (modules.length > 0 && modulesValues.length === 0) {
-      setLoading(true);
-      // Pobranie list możliwości dla modułów
-      const list = modules[0].kWoltList;
-      setModulesValues(list);
-
+    if (modules.length > 0) {
       setLoading(false);
     }
   }, [modules]);
 
   return (
     <>
-      <InputList
+      {option === "Instalacja + magazyn energii" || option === "Instalacja" ? <InputList
         Title={"Status instalacji"}
         Items={["Nowa instalacja", "Rozbudowa istniejącej instalacji"]}
         handleForm={handleForm}
-      />
+      /> : null}
       <InputList
         Title={"Rodzaj finansowania"}
         Items={["Prefinansowanie", "Gotówka"]}
@@ -123,96 +134,47 @@ function Installation({ handleForm }) {
         Items={["Obceny system rozliczeń", "Inny"]}
         handleForm={handleForm}
       />
-      <InputList
-        Title={"Konstrukcja"}
-        Items={["Grunt", "Dach"]}
-        handleForm={handleForm}
-      />
-      <InputList
-        Title={"Moduły"}
-        Items={modules}
-        SubItems={modulesValues.map(({ howMany, kWoltValue, price }) => ({
-          name: `${howMany} - ${kWoltValue} kW`,
-          value: JSON.stringify({ howMany, kWoltValue, price }),
-        }))}
-        handleForm={handleForm}
-        changeFunction={onModuleChange}
-        changeSubFunction={onModuleValuesChange}
-        isLoading={isLoading}
-      />
-      <InputList
-        Title={"Falownik"}
-        Items={falowniki}
-        PlaceholderEmpty={"Wybierz ilość modułów"}
-        Placeholder={"Wybierz opcję"}
-        isLoading={isFalownikiLoading}
-        SubItems={["Grunt", "Inne"]}
-        handleForm={handleForm}
-      />
-      <InputList
-        Title={"Drugi falownik"}
-        Items={falowniki}
-        PlaceholderEmpty={"Wybierz ilość modułów"}
-        Placeholder={"Wybierz opcję"}
-        isLoading={isFalownikiLoading}
-        SubItems={["Grunt", "Inne"]}
-        handleForm={handleForm}
-      />
-      <InputList
-        Title={"Magazyn energii"}
-        Items={["Test", "Test"]}
-        handleForm={handleForm}
-      />
-      <InputList
-        Title={"Magazyn ciepła"}
-        Items={["Test", "Test"]}
-        handleForm={handleForm}
-      />
-      <InputList
-        Title={"System zarządzania energią"}
-        Items={["Grunt", "Dach"]}
-        handleForm={handleForm}
-      />
-      <InputList
-        Title={"Optymalizatory"}
-        Items={["Grunt", "Dach"]}
-        handleForm={handleForm}
-      />
-      <InputList
-        Title={"Rozłącznik prądu stałego"}
-        Items={["Grunt", "Dach"]}
-        handleForm={handleForm}
-      />
-      <InputList
-        Title={"Zasilanie instalacji"}
-        Items={["Grunt", "Dach"]}
-        handleForm={handleForm}
-      />
-      <InputList
-        Title={"Przekop"}
-        Items={["Grunt", "Dach"]}
-        handleForm={handleForm}
-      />
-      <InputList
-        Title={"Ładowarka AC"}
-        Items={["Grunt", "Dach"]}
-        handleForm={handleForm}
-      />
-      <InputList
-        Title={"Ładowarka do samochodów elektrycznych"}
-        Items={["Grunt", "Dach"]}
-        handleForm={handleForm}
-      />
-      <InputList
-        Title={"Słupek montażowy"}
-        Items={["Grunt", "Dach"]}
-        handleForm={handleForm}
-      />
-      <InputList
-        Title={"Uchwyt na kabel"}
-        Items={["Grunt", "Dach"]}
-        handleForm={handleForm}
-      />
+      {option === "Instalacja + magazyn energii" || option === "Instalacja" ?
+      <>
+        <InputList
+          Title={"Konstrukcja"}
+          Items={["Grunt", "Dach"]}
+          handleForm={handleForm}
+        />
+        <InputList
+          Title={"Moduły"}
+          Items={modules}
+          SubItems={modulesValues}
+          handleForm={handleForm}
+          changeFunction={onModuleChange} 
+          changeSubFunction={onModuleValuesChange}
+          isLoading={isLoading}
+        />
+        <InputList
+          Title={"Falownik"}
+          Items={falowniki.map(({ name, price, category }) => ({name, value: JSON.stringify({ price, category })}))}
+          PlaceholderEmpty={"Wybierz ilość modułów"}
+          Placeholder={"Wybierz opcję"}
+          isLoading={isFalownikiLoading}
+          replaceSubType={"number"}
+          handleForm={handleForm}
+        />
+      </> : null}
+      {(option === "Magazyn energii" || option === "Instalacja + magazyn energii") && falownikCategory !== "Zestaw" ? 
+      <>
+        <InputList
+          Title={"Magazyn energii"}
+          Items={["Magazyn 1", "Magazyn 2"]}
+          handleForm={handleForm}
+        />
+        <InputList
+          Title={"Magazyn ciepła"}
+          Items={["Mag 1", "Mag 2"]}
+          handleForm={handleForm}
+        />
+      </>
+      : null}
+      <MultiListInput Title={"Opcje"} options={["Ładowarka elektyczna", "Uchwyt na kabel", "Optymalizator"]} handleForm={handleForm}/>
     </>
   );
 }

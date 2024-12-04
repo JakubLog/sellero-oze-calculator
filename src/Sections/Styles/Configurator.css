@@ -17,7 +17,7 @@
 .OptionsItem {
   padding: 10px 25px;
   border-radius: 10px;
-  border: 2px solid orange;
+  border: 2px solid rgb(61, 136, 201);
   color: black;
   font-weight: 600;
   cursor: pointer;
@@ -25,13 +25,13 @@
 }
 
 .OptionsItem:hover {
-  background-color: orange;
+  background-color: rgb(61, 136, 201);
   border-radius: 10px;
   color: white;
 }
 
 .OptionsItem-active {
-  background-color: orange;
+  background-color: rgb(61, 136, 201);
   border-radius: 10px;
   color: white;
 }
@@ -41,7 +41,7 @@
   left: 0;
   border-radius: 20px;
   height: 4px;
-  background-color: rgb(164, 113, 4);
+  background-color: rgb(37, 99, 154);
   transition: transform 0.3s ease, width 0.3s ease;
 }
 
@@ -61,12 +61,12 @@
 
 .BoxItem-1 {
   width: 60%;
-  border-top: 3px dashed rgb(169, 119, 26);
+  border-top: 3px dashed rgb(61, 136, 201);
 }
 
 .BoxItem-2 {
   width: 40%;
-  background-color: rgb(209, 146, 31);
+  background-color: rgb(61, 136, 201);
 }
 
 .BoxInner {
@@ -78,9 +78,8 @@
   margin-top: 20px;
 }
 
-.BoxInner:first-child::after {
-  margin-top: 15px;
-  border-top: 2px solid white;
+.BoxInner:first-child {
+  margin-top: 0px;
 }
 
 .BoxInnerHeader {
@@ -91,7 +90,7 @@
 
 .BoxCosts {
   padding: 15px 10px;
-  background-color: rgb(221, 203, 169);
+  background-color: rgb(167, 202, 233);
   color: black;
   margin: 10px 0;
   border-radius: 5px;
@@ -124,16 +123,69 @@
 .SendButton {
   border-radius: 15px;
   padding: 20px 25px;
-  background-color: rgb(141, 191, 141);
-  border: 3px solid rgb(8, 110, 8);
-  color: black;
+  background-color: transparent;
+  border: 3px solid rgb(30, 92, 146);
+  color: white;
+  margin-bottom: 5px;
   font-size: 18px;
   font-weight: bold;
   transition: color 0.3s ease, background-color 0.3s ease;
   cursor: pointer;
+  position: relative;
+  margin-top: 30px;
 }
 
 .SendButton:hover {
-  background-color: rgb(8, 110, 8);
+  background-color: rgb(30, 92, 146);
   color: white;
+}
+
+.SendButton::after {
+  position: absolute;
+  content: "";
+  left: 2%;
+  width: 96%;
+  height: 2px;
+  bottom: calc(100% + 15px);
+  background-color: white;
+}
+
+.ProffButton {
+  color: white;
+  text-decoration: underline;
+  width: 100%;
+  font-size: 10px; 
+  text-align: center;
+  cursor: pointer;
+}
+
+.BoxInnerToggle > .BoxInnerHeader {
+  cursor: pointer; 
+  position: relative;
+}
+
+.BoxInnerToggle > .BoxInnerHeader::after {
+  content: ">";
+  position: absolute;
+  right: 0;
+  font-size: 22px;
+  transform: rotate(270deg);
+  transition: transform 0.3s ease;
+}
+
+.BoxInnerToggle-active > .BoxInnerHeader::after {
+  transform: rotate(90deg);
+} 
+
+.BoxInnerContent {
+  opacity: 0;
+  height: 0;
+  transform: translateX(-10px);
+  transition: opacity 0.5s ease, transform 0.5s ease, height 0.6s ease;
+}
+
+.BoxInnerContent-active {
+  opacity: 1;
+  height: 100%;
+  transform: translateX(0);
 }
