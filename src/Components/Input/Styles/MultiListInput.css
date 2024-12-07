@@ -1,55 +1,55 @@
 .multi-list-input {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  margin: 0 auto;
 }
 
 .selected-title {
-    font-size: 16px;
-    font-weight: bold;
-    margin-bottom: 4px;
-    margin-top: 18px;
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 4px;
+  margin-top: 18px;
 }
 
 .selected-options {
-    width: 100%;
-    margin-bottom: 14px;
-    color: #111;
-    font-size: 14px;
+  width: 100%;
+  margin-bottom: 14px;
+  color: #111;
+  font-size: 14px;
 }
 
 .multi-list-input input {
-    padding: 8px;
-    border: 2px solid #85b7e3;
-    border-radius: 4px;
-    margin-bottom: 12px;
-    font-size: 16px;
+  padding: 8px;
+  border: 2px solid #85b7e3;
+  border-radius: 4px;
+  margin-bottom: 12px;
+  font-size: 16px;
 }
 
 .multi-list-input ul {
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
 }
 
 .multi-list-input li {
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    margin-bottom: 8px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  margin-bottom: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .options-list .selected {
-    background-color: #85b7e3;
-    color: white;
+  background-color: #85b7e3;
+  color: white;
 }
 
 .options-list {
-    width: 100%;
+  width: 100%;
 }
 
 .option > * {
@@ -60,6 +60,46 @@
 }
 
 .option input {
-    width: 40px;
-    border: 2px solid #85b7e3;
+  width: 40px;
+  border: 2px solid #85b7e3;
+  margin: 0;
+}
+
+.customOptionItem {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-top: 35px;
+  position: relative;
+}
+
+.customOptionItem input {
+  height: 100%;
+  margin: 0;
+}
+
+.customOptionItem::before {
+  display: block;
+  content: "Dodaj nową opcję";
+  color: black;
+  position: absolute;
+  font-size: 12px;
+  top: -20px;
+  left: 0;
+  font-weight: bold;
+}
+
+.customOptionItem button {
+  color: white;
+  background-color: #85b7e3;
+  border: 0;
+  padding: 12px 25px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.3s;
+}
+
+.customOptionItem button:hover {
+  background-color: #5a8ac6;
 }

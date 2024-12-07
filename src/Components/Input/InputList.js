@@ -1,5 +1,5 @@
 import "./Styles/InputList.css";
- 
+
 const InputList = ({
   Title,
   isLoading = false,
@@ -12,10 +12,12 @@ const InputList = ({
   changeFunction = null,
   changeSubFunction = null,
   replaceSubType = null,
+  selectedItem = null,
+  parameters = { isFormHandled: false },
 }) => {
   const changeFunctionPre = (e) => {
     if (changeFunction) changeFunction(e);
-    if (handleForm) handleForm(e);
+    if (handleForm && !parameters.isFormHandled) handleForm(e);
   };
 
   const changeFunctionPreSub = (e) => {
@@ -58,7 +60,11 @@ const InputList = ({
                     {item.name}
                   </option>
                 ) : (
-                  <option key={item} value={item}>
+                  <option
+                    key={item}
+                    selected={item === selectedItem}
+                    value={item}
+                  >
                     {item}
                   </option>
                 )
@@ -71,13 +77,16 @@ const InputList = ({
             <input
               type="number"
               name={`${Title}Value`}
-              onChange={changeFunctionPreSub} 
+              onChange={changeFunctionPreSub}
               required
               defaultValue={1}
-              className="SubNumber"  
+              minLength={1}
+              min={1}
+              className="SubNumber"
             />
           </div>
-        ) : SubItems && (
+        ) : (
+          SubItems && (
             <select
               className="SubSelect"
               name={`sub-${Title}`}
@@ -108,6 +117,7 @@ const InputList = ({
                 </>
               )}
             </select>
+          )
         )}
       </div>
     </div>

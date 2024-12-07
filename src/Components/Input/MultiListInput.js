@@ -1,42 +1,62 @@
-import React, { useState } from 'react';
-import './Styles/MultiListInput.css';
-import InputNumber from './InputNumber';
+import React, { useState } from "react";
+import "./Styles/MultiListInput.css";
+import ListOption from "./ListOption";
 
-const MultiListInput = ({ options, Title, handleForm }) => {
-    const [selectedOptions, setSelectedOptions] = useState([]);
-    const [isOpen, setIsOpen] = useState(false);
+const MultiListInput = ({
+  options,
+  Title,
+  handleForm,
+  isCustomOption = false,
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [customOption, setCustomOption] = useState("");
+  const [allOptions, setAllOptions] = useState(options);
 
-    const handleOptionClick = (option) => {
-        const newSelectedOptions = selectedOptions.includes(option)
-            ? selectedOptions.filter((item) => item !== option)
-            : [...selectedOptions, option];
-        setSelectedOptions(newSelectedOptions);
-        handleForm({target: { name: Title, value: JSON.stringify(newSelectedOptions)}});
+  const handleFormChange = (option, value) => {
+    const readyObject = {
+      name: `Opcja-${option}`,
+      value,
     };
+    handleForm({ target: { ...readyObject } });
+  };
 
-    return (
-        <div className="multi-list-input">
-            <div className="selected-title" onClick={() => setIsOpen(!isOpen)}>
-                {Title}
-            </div>
-            <div className="selected-options"><b>Wybrano</b>: {selectedOptions.join(", ") || "brak"}</div>
-                <ul className="options-list">
-                    {options.map((option) => (
-                        <div className="option">
-                        <li
-                            key={option}
-                            className={selectedOptions.includes(option) ? 'selected' : ''}
-                            style={{position: "relative"}}
-                        >
-                            <div onClick={() => handleOptionClick(option)} style={{position: "absolute", top: 0, left: 0, width: "85%", cursor: "pointer", height: "100%"}}></div>
-                            <div>{option}</div>
-                            <input type="number"></input>
-                        </li>
-                        </div>
-                    ))}
-                </ul>
-        </div>
-    );
+  return (
+    <div className="multi-list-input">
+      <div
+        className="selected-title"
+        style={{ marginBottom: 10 }}
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        {Title}
+      </div>
+      <ul className="options-list">
+        {allOptions.map((option) => (
+          <ListOption option={option} handleFormChange={handleFormChange} />
+        ))}
+        {isCustomOption && (
+          <div className="customOptionItem">
+            <input
+              type="text"
+              value={customOption}
+              onChange={(e) => setCustomOption(e.target.value)}
+            />
+            <button
+              type="button"
+              onClick={() => {
+                setAllOptions((r) => {
+                  const newArray = [...r, customOption];
+                  return newArray;
+                });
+                setCustomOption("");
+              }}
+            >
+              Dodaj
+            </button>
+          </div>
+        )}
+      </ul>
+    </div>
+  );
 };
 
 export default MultiListInput;
