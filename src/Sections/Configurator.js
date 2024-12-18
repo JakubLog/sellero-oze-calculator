@@ -10,7 +10,7 @@ const defaultFormData = {
   "Typ instalacji": "Instalacja PV + magazyn energii",
 };
 
-const menuOptions = ["PV i Magayny energii", "Ocieplenie", "Źródła ciepła"];
+const menuOptions = ["PV i Magazyny energii", "Źródła ciepła"];
 
 const isValidJSON = (str) => {
   try {
@@ -28,6 +28,8 @@ function Configurator() {
   const [formData, setFormData] = useState(defaultFormData);
   const [menuIndex, setMenuIndex] = useState(0);
   const [underlineStyle, setUnderlineStyle] = useState({});
+  const [isModalOpen, setModalState] = useState(false);
+  const [modalContent, setModalContent] = useState({title: "Test", content: "Test"});
   const [prices, setPrices] = useState({
     vat: 0,
     netto: 0,
@@ -39,6 +41,12 @@ function Configurator() {
   const [narzut, setNarzut] = useState(0);
   const [falownikCategory, setFalownikCategory] = useState(null);
   const menuRef = useRef(null);
+
+
+  const openModal = ({title, content}) => {
+      setModalState(true);
+      setModalContent({title, content});
+  };
 
   const setTypeOfFalownik = (formData) => {
     if (formData["Falownik"]) {
@@ -124,21 +132,178 @@ function Configurator() {
     setPrices(readyObject);
   };
 
-  const onOptionChange = (event) => {
-    const selectedOption = event.target.value;
-    setOption(selectedOption);
-  };
-
   const handleFormChange = (e) => {
     const { name, value } = e.target;
 
     setFormData({ ...formData, [name]: value });
   };
 
+  const eraseFormData = () => {
+    setFormData(() => {
+      const obj = {...defaultFormData};
+      return obj;
+    });
+  }
+
+  const onOptionChange = (event) => {
+    const selectedOption = event.target.value;
+    setOption(selectedOption);
+  };
+
+  function convertToQueryString(baseURL, formDataObject, title) {
+    // Start with the base URL
+    let queryString = baseURL + `?entityTypeId=1060&fields[Title]=Oferta%20-%20${title}&fields[parentId2]=${window.BitrixUserID}&`;
+  
+    // Iterate over the keys of the object
+    for (const key in formDataObject) {
+      if (formDataObject.hasOwnProperty(key)) {
+        const value = formDataObject[key]?.value;
+        if (value !== undefined) {
+          // Append the key and value in the required format
+          queryString += `fields[${key}]=${encodeURIComponent(value)}&`;
+        }
+      }
+    }
+  
+    // Remove the trailing '&' and return the final URL
+    return queryString.slice(0, -1);
+  }
+
   const handleFormSubmit = (e) => {
     e.preventDefault();
 
-    console.log(formData);
+    const readyFormData = {
+      "ufCrm19_1734092712114": {
+        name: "Cena netto",
+        value: prices.netto
+      },
+      "ufCrm19_1734092725302": {
+        name: "Cena brutto",
+        value: prices.brutto
+      },
+      "ufCrm19_1734092750158": {
+        name: "VAT",
+        value: prices.vat
+      },
+      "ufCrm19_1734093565018": {
+        name: "PV Rodzaj finansowania",
+        value: formData["Rodzaj finansowania"]
+      },
+      "ufCrm19_1734093595366": {
+        name: "Status instalacji",
+        value: formData["Status instalacji"]
+      }
+    }
+
+    let preapredReadyObject = {};
+    if(menuIndex === 0) {
+      const falownikData = JSON.parse(formData["Falownik"]);
+      const modulesData = JSON.parse(formData["sub-Moduły"]);
+
+      preapredReadyObject = {
+        ...readyFormData,
+        "ufCrm19_1734093614566": {
+          name: "System rozliczenia",
+          value: formData["System rozliczania"]
+        },
+        "ufCrm19_1734093629086": {
+          name: "Typ instalacji",
+          value: formData["Typ instalacji"]
+        },
+        "ufCrm19_1734093232322": {
+        name: "Falownik - nazwa",
+        value: falownikData.name
+      },
+      "ufCrm19_1734093267498": {
+        name: "Falownik - cena",
+        value: falownikData.price
+      },
+      "ufCrm19_1734093288078": {
+        name: "Falwonik - kategoria",
+        value: falownikData.category
+      },
+      "ufCrm19_1734093309086": {
+        name: "Konstrukcja",
+        value: formData["Konstrukcja"]
+      },
+      "ufCrm19_1734093323254": {
+        name: "Magazyn ciepła",
+        value: formData["Magazyn ciepła"]
+      },
+      "ufCrm19_1734093345622": {
+        name: "Magazyn energii",
+        value: formData["Magazyn energii"]
+      },
+      "ufCrm19_1734093383135": {
+        name: "Moduły - nazwa",
+        value: formData["Moduły"]
+      },
+      "ufCrm19_1734093430394": {
+        name: "Moduły - KW",
+        value: modulesData.kw
+      },
+      "ufCrm19_1734093455162": {
+        name: "Moduły - Ilość paneli",
+        value: modulesData.howMuch
+      },
+      "ufCrm19_1734093509546": {
+        name: "Moduły - fazy",
+        value: modulesData.fazy
+      },
+      "ufCrm19_1734093541530": {
+        name: "Moduły - Cena modułu",
+        value: modulesData.price
+      }};
+
+    } else if(menuIndex === 1) {
+      const heatPumpData = JSON.parse(formData["Pompa ciepła"]);
+      const zasobnikCWData = JSON.parse(formData["Zasobnik CW"]);
+
+      preapredReadyObject = {
+        ...readyFormData,
+      "ufCrm19_1734093989098": {
+        name: "Pompa ciepła - nazwa",
+        value: "Pompa ciepła"
+      },
+      "ufCrm19_1734094017834": {
+        name: "Pompa ciepła - cena",
+        value: heatPumpData.price
+      },
+      "ufCrm19_1734094043667": {
+        name: "Bufor CO - nazwa",
+        value: heatPumpData.buforCO
+      },
+      "ufCrm19_1734094087739": {
+        name: "Bufor CO - cena",
+        value: heatPumpData.buforCOPrice
+      },
+      "ufCrm19_1734094106660": {
+        name: "Pompa ciepła - KW",
+        value: heatPumpData.kwValue
+      },
+      "ufCrm19_1734094130334": {
+        name: "Pompa ciepła - M/S",
+        value: heatPumpData.ms
+      },
+      "ufCrm19_1734094161006": {
+        name: "Zasobnik CW - nazwa",
+        value: zasobnikCWData.name
+      },
+      "ufCrm19_1734094180750": {
+        name: "Zasobnik CW - cena",
+        value: zasobnikCWData.price
+      }};
+    }
+
+      const readyUrl = convertToQueryString("https://opalpower.bitrix24.pl/rest/87/n9jz2bhymt5cw72t/crm.item.add.json", preapredReadyObject, menuIndex === 0 ? "Instalacje PV" : "Źródła ciepła");
+      fetch(readyUrl).then(res => res.json()).then(data => console.log(data));
+
+      console.log("Zapisano!", readyFormData, preapredReadyObject);
+      console.log(readyUrl);
+
+      setModalState(false);
+      window.location.reload();
+      eraseFormData();
   };
 
   useEffect(() => {
@@ -171,7 +336,10 @@ function Configurator() {
               className={`OptionsItem ${
                 index === menuIndex ? "OptionsItem-active" : ""
               }`}
-              onClick={() => setMenuIndex(index)}
+              onClick={() => {
+                setMenuIndex(index); 
+                eraseFormData();
+              }}
             >
               {item}
             </div>
@@ -201,8 +369,8 @@ function Configurator() {
                 />
               </>
             )}
-            {menuIndex === 1 && <Ocieplenie />}
-            {menuIndex === 2 && (
+            {menuIndex === 2 && <Ocieplenie />}
+            {menuIndex === 1 && (
               <ZrodlaCiepla
                 handleForm={handleFormChange}
                 formValues={formData}
@@ -259,7 +427,7 @@ function Configurator() {
               </div>
             </div>
 
-            <button className="SendButton" type="submit">
+            <button className="SendButton" type="button" onClick={() => openModal({title: "Potwierdź wysłanie", content: "Kliknij i potwierdź wysłanie kalkulacji"})}>
               Zapisz ofertę!
             </button>
             <div
@@ -290,6 +458,15 @@ function Configurator() {
           Terms and conditions
         </a>
       </div>
+      {isModalOpen && <><div style={{width: "100vw", height: "100vh", position: "fixed", left: 0, top: 0, backgroundColor: "rgb(0, 0, 0, 0.2)"}}></div>
+      <div style={{position: "fixed", margin: "auto", top: "0", left: "0", right:0, bottom: 0,  width: "500px", height: "300px", backgroundColor: "white", borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", color: "black" }}>
+        <h1>{modalContent.title}</h1>
+        <p>{modalContent.content}</p>
+        <button className="SendButton" type="submit" style={{color: "black"}} onClick={handleFormSubmit}>
+          Stwórz ofertę
+        </button>
+        <p style={{cursor: "pointer"}} onClick={() => setModalState(false)}>Zamknij</p> 
+      </div></>}
     </form>
   );
 }

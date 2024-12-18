@@ -13,7 +13,7 @@ const InputList = ({
   changeSubFunction = null,
   replaceSubType = null,
   selectedItem = null,
-  parameters = { isFormHandled: false },
+  parameters = { isFormHandled: false, isDisabled: false },
 }) => {
   const changeFunctionPre = (e) => {
     if (changeFunction) changeFunction(e);
@@ -36,6 +36,7 @@ const InputList = ({
           onChange={changeFunctionPre}
           defaultValue={defaultItem}
           required
+          disabled={parameters.isDisabled}
           className="FirstSelect"
         >
           {isLoading ? (

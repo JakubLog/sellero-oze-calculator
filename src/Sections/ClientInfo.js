@@ -7,7 +7,7 @@ function ClientInfo() {
       <div className="ClientContent">
         <div className="ClientOptions">
           <b>Status:</b>
-          <p>Połączony z systemem Bitrix24 {`(Klient #ID)`} ✅</p>
+          <p>Połączony z systemem Bitrix24 {`(Klient #${window.BitrixUserID})`} ✅</p>
         </div>
         <div className="ClientOptions">
           <b>Nazwa klienta:</b>

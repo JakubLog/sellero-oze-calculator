@@ -72,29 +72,38 @@ function Installation({ handleForm, formValues, option, falownikCategory }) {
       .firstPage((err, records) => {
         let foundFalowniki = [];
         if (option === "Instalacja PV + magazyn energii") {
-          foundFalowniki = records.filter(
+          const notSortedFalowniki = records.filter(
             (record) =>
               (record.fields["Moc falownika min"] / 100 <= kw &&
-                record.fields["Moc falownika max"] / 100 >= kw &&
-                record.fields["Kategoria"] === "Hybryda") ||
-              record.fields["Kategoria"] === "Zestaw"
+                record.fields["Moc falownika max"] / 100 >= kw) &&
+                (record.fields["Kategoria"] === "Hybryda" ||
+                record.fields["Kategoria"] === "Zestaw")
+          );
+          foundFalowniki = notSortedFalowniki.sort(
+            (a, b) => a.fields["Moc falownika min"] - b.fields["Moc falownika min"]
           );
         } else if (option === "Instalacja PV") {
-          foundFalowniki = records.filter(
+          const notSortedFalowniki = records.filter(
             (record) =>
               record.fields["Moc falownika min"] / 100 <= kw &&
               record.fields["Moc falownika max"] / 100 >= kw &&
               record.fields["Kategoria"] === "Zwykły"
           );
+          foundFalowniki = notSortedFalowniki.sort(
+            (a, b) => a.fields["Moc falownika min"] - b.fields["Moc falownika min"]);
         } else {
-          foundFalowniki = records.filter(
+          const notSortedFalowniki = records.filter(
             (record) =>
               record.fields["Moc falownika min"] / 100 <= kw &&
               record.fields["Moc falownika max"] / 100 >= kw
           );
+          foundFalowniki = notSortedFalowniki.sort(
+            (a, b) => a.fields["Moc falownika min"] - b.fields["Moc falownika min"]);
         }
+        if(foundFalowniki.length === 0) return;
+        const preparedFalowniki = foundFalowniki.map(({ fields }, i) => i !== 0 ? {fields: {...fields, Name: "(Przemiarowany) " + fields.Name, isSuggested: false}} : {fields: {...fields, Name: "(Sugerowany) " + fields.Name, isSuggested: true}});
 
-        const namesOfFalowniki = foundFalowniki.map(({ fields }) => ({
+        const namesOfFalowniki = preparedFalowniki.map(({ fields }) => ({
           name: fields.Name,
           price: fields.Price,
           category: fields["Kategoria"],
@@ -148,7 +157,7 @@ function Installation({ handleForm, formValues, option, falownikCategory }) {
       />
       <InputList
         Title={"System rozliczania"}
-        Items={["Obceny system rozliczeń", "Inny"]}
+        Items={["Obecny system rozliczeń", "Inny"]}
         handleForm={handleForm}
       />
       {option === "Instalacja PV + magazyn energii" ||
@@ -172,7 +181,7 @@ function Installation({ handleForm, formValues, option, falownikCategory }) {
             Title={"Falownik"}
             Items={falowniki.map(({ name, price, category }) => ({
               name,
-              value: JSON.stringify({ price, category }),
+              value: JSON.stringify({ name, price, category }),
             }))}
             PlaceholderEmpty={"Wybierz ilość modułów"}
             Placeholder={"Wybierz opcję"}
