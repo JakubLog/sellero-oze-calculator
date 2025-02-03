@@ -1,4 +1,4 @@
-import "./Styles/Configurator.css";
+import './Styles/Configurator.css';
 
 function Magazine() {
   return <div></div>;

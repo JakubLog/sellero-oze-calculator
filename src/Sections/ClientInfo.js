@@ -1,4 +1,4 @@
-import "./Styles/ClientInfo.css";
+import './Styles/ClientInfo.css';
 
 function ClientInfo() {
   return (
@@ -7,19 +7,7 @@ function ClientInfo() {
       <div className="ClientContent">
         <div className="ClientOptions">
           <b>Status:</b>
-          <p>Połączony z systemem Bitrix24 {`(Klient #${window.BitrixUserID})`} ✅</p>
-        </div>
-        <div className="ClientOptions">
-          <b>Nazwa klienta:</b>
-          <p>Jakub Fedoszczak</p>
-        </div>
-        <div className="ClientOptions">
-          <b>Adres:</b>
-          <p>Środa Śląska ul. Wrocławska 63/4, 55-300</p>
-        </div>
-        <div className="ClientOptions">
-          <b>Budżet:</b>
-          <p>50 000 zł</p>
+          <p>Połączony z systemem Bitrix24 ✅</p>
         </div>
       </div>
     </div>

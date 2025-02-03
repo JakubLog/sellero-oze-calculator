@@ -1,15 +1,11 @@
-import "./Styles/InputNumber.css";
+import './Styles/InputNumber.css';
 
-const InputNumber = ({
-  Title,
-  handleForm = null,
-  changeInputFunction = null
-}) => {
+const InputNumber = ({ Title, handleForm = null, changeInputFunction = null }) => {
   const changeFunction = (e) => {
     const value = e.target.value;
 
     if (changeInputFunction) changeInputFunction(e);
-    if (handleForm) handleForm({ target: { value: JSON.stringify({price: Number(value)}), name: Title }});
+    if (handleForm) handleForm({ target: { value: JSON.stringify({ price: Number(value) }), name: Title } });
   };
 
   return (
@@ -19,15 +15,9 @@ const InputNumber = ({
       </div>
       <div className="Content">
         <div className="InputStylesBox">
-            <input
-              type="number"
-              name={`${Title}`} 
-              onChange={changeFunction} 
-              required
-              className="InputStyles"  
-            />
-            </div>
-       </div>
+          <input type="number" name={`${Title}`} onChange={changeFunction} required className="InputStyles" />
+        </div>
+      </div>
     </div>
   );
 };

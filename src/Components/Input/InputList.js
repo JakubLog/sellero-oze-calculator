@@ -1,19 +1,19 @@
-import "./Styles/InputList.css";
+import './Styles/InputList.css';
 
 const InputList = ({
   Title,
   isLoading = false,
   Items,
   SubItems,
-  Placeholder = "Wybierz opcję",
-  PlaceholderEmpty = "Brak / Nie znaleziono",
+  Placeholder = 'Wybierz opcję',
+  PlaceholderEmpty = 'Brak / Nie znaleziono',
   defaultItem = null,
   handleForm = null,
   changeFunction = null,
   changeSubFunction = null,
   replaceSubType = null,
   selectedItem = null,
-  parameters = { isFormHandled: false, isDisabled: false },
+  parameters = { isFormHandled: false, isDisabled: false }
 }) => {
   const changeFunctionPre = (e) => {
     if (changeFunction) changeFunction(e);
@@ -43,29 +43,16 @@ const InputList = ({
             <option>Ładowanie...</option>
           ) : (
             <>
-              <option
-                value=""
-                disabled
-                selected
-                hidden
-                style={{ color: "red" }}
-              >
+              <option value="" disabled selected hidden style={{ color: 'red' }}>
                 {Items.length > 1 ? Placeholder : PlaceholderEmpty}
               </option>
               {Items.map((item) =>
                 item.name ? (
-                  <option
-                    key={item.name}
-                    value={item.value ? item.value : item.name}
-                  >
+                  <option key={item.name} value={item.value ? item.value : item.name}>
                     {item.name}
                   </option>
                 ) : (
-                  <option
-                    key={item}
-                    selected={item === selectedItem}
-                    value={item}
-                  >
+                  <option key={item} selected={item === selectedItem} value={item}>
                     {item}
                   </option>
                 )
@@ -73,7 +60,7 @@ const InputList = ({
             </>
           )}
         </select>
-        {replaceSubType === "number" ? (
+        {replaceSubType === 'number' ? (
           <div className="SubNumberBox">
             <input
               type="number"
@@ -88,12 +75,7 @@ const InputList = ({
           </div>
         ) : (
           SubItems && (
-            <select
-              className="SubSelect"
-              name={`sub-${Title}`}
-              required
-              onChange={changeFunctionPreSub}
-            >
+            <select className="SubSelect" name={`sub-${Title}`} required onChange={changeFunctionPreSub}>
               {isLoading ? (
                 <option>Ładowanie...</option>
               ) : (
@@ -103,10 +85,7 @@ const InputList = ({
                   </option>
                   {SubItems.map((item) =>
                     item.name ? (
-                      <option
-                        key={item.name}
-                        value={item.value ? item.value : item.name}
-                      >
+                      <option key={item.name} value={item.value ? item.value : item.name}>
                         {item.name}
                       </option>
                     ) : (

@@ -52,7 +52,7 @@
 }
 
 .SubNumberBox::after {
-  content: "szt.";
+  content: 'szt.';
   display: block;
   position: absolute;
   background-color: rgb(30, 92, 146);

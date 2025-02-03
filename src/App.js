@@ -1,5 +1,5 @@
-import "./App.css";
-import Content from "./Sections/Content";
+import './App.css';
+import Content from './Sections/Content';
 
 function App() {
   return (

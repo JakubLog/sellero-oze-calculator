@@ -55,14 +55,20 @@
 .option > * {
   margin: 0;
   display: flex;
+  height: 40px;
   justify-content: space-between;
   align-items: center;
 }
 
 .option input {
-  width: 40px;
+  width: 80px; 
   border: 2px solid #85b7e3;
   margin: 0;
+}
+
+.option label {
+  margin-right: 10px;
+  margin-left: 15px;
 }
 
 .customOptionItem {
